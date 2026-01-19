@@ -1650,6 +1650,14 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
   ChromeVersionService::RegisterProfilePrefs(registry);
   chrome_browser_net::NetErrorTabHelper::RegisterProfilePrefs(registry);
   chrome_prefs::RegisterProfilePrefs(registry);
+  registry->RegisterBooleanPref(prefs::kAiEnabled, false);
+  registry->RegisterBooleanPref(prefs::kAiSidePanelEnabled, false);
+  registry->RegisterBooleanPref(prefs::kAiAllowRemoteRequests, false);
+  registry->RegisterIntegerPref(prefs::kAiDataRetentionDays, 0);
+  registry->RegisterBooleanPref(prefs::kAiNotesEnabled, false);
+  registry->RegisterBooleanPref(prefs::kAiProjectsEnabled, false);
+  registry->RegisterBooleanPref(prefs::kAiSemanticHistoryEnabled, false);
+  registry->RegisterIntegerPref(prefs::kAiPermissionsExpireDays, 0);
   collaboration::prefs::RegisterProfilePrefs(registry);
   commerce::RegisterProfilePrefs(registry);
   contextual_search::ContextualSearchService::RegisterProfilePrefs(registry);

@@ -11,10 +11,12 @@
 
 #include "base/check_deref.h"
 #include "base/check_op.h"
+#include "base/feature_list.h"
 #include "base/functional/bind.h"
 #include "base/functional/callback_helpers.h"
 #include "chrome/app/chrome_command_ids.h"
 #include "chrome/app/vector_icons/vector_icons.h"
+#include "chrome/browser/ai/features.h"
 #include "chrome/browser/contextual_tasks/contextual_tasks_side_panel_coordinator.h"
 #include "chrome/browser/devtools/devtools_window.h"
 #include "chrome/browser/prefs/incognito_mode_prefs.h"
@@ -90,6 +92,7 @@
 #include "chrome/browser/ui/web_applications/web_app_dialog_utils.h"
 #include "chrome/browser/ui/webui/side_panel/customize_chrome/customize_chrome_section.h"
 #include "chrome/common/chrome_features.h"
+#include "chrome/common/pref_names.h"
 #include "chrome/grit/branded_strings.h"
 #include "chrome/grit/generated_resources.h"
 #include "components/collaboration/public/messaging/activity_log.h"
@@ -260,6 +263,17 @@ void BrowserActions::InitializeBrowserActions() {
                               vector_icons::kStorefrontIcon,
                               kActionSidePanelShowMerchantTrust, bwi, false))
           .Build());
+
+  if (base::FeatureList::IsEnabled(features::kAiSidePanel) &&
+      profile->GetPrefs()->GetBoolean(prefs::kAiEnabled) &&
+      profile->GetPrefs()->GetBoolean(prefs::kAiSidePanelEnabled)) {
+    root_action_item_->AddChild(
+        SidePanelAction(SidePanelEntryId::kAiSidePanel,
+                        IDS_AI_SIDE_PANEL_TITLE, IDS_AI_SIDE_PANEL_TITLE,
+                        kTaskSparkIcon, kActionSidePanelShowAiSidePanel, bwi,
+                        true)
+            .Build());
+  }
 
   if (side_panel::history_clusters::
           IsHistoryClustersSidePanelSupportedForProfile(profile) &&
