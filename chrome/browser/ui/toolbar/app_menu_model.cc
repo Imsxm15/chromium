@@ -24,6 +24,7 @@
 #include "build/build_config.h"
 #include "chrome/app/chrome_command_ids.h"
 #include "chrome/app/vector_icons/vector_icons.h"
+#include "chrome/browser/ai/features.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/defaults.h"
 #include "chrome/browser/extensions/extension_ui_util.h"
@@ -1021,6 +1022,13 @@ void ToolsMenuModel::Build(Browser* browser) {
     AddItemWithStringIdAndVectorIcon(this, IDC_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL,
                                      IDS_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL,
                                      kEditChromeRefreshIcon);
+  }
+
+  if (base::FeatureList::IsEnabled(features::kAiSidePanel) &&
+      browser->profile()->GetPrefs()->GetBoolean(prefs::kAiEnabled) &&
+      browser->profile()->GetPrefs()->GetBoolean(prefs::kAiSidePanelEnabled)) {
+    AddItemWithStringIdAndVectorIcon(this, IDC_SHOW_AI_SIDE_PANEL,
+                                     IDS_AI_SIDE_PANEL_TITLE, kTaskSparkIcon);
   }
 
   AddSeparator(ui::NORMAL_SEPARATOR);

@@ -549,6 +549,7 @@
   /* Side Panel items */ \
   E(kActionSidePanelShowAboutThisSite) \
   E(kActionSidePanelShowAssistant) \
+  E(kActionSidePanelShowAiSidePanel, IDC_SHOW_AI_SIDE_PANEL) \
   E(kActionSidePanelShowBookmarks, IDC_SHOW_BOOKMARK_SIDE_PANEL) \
   E(kActionSidePanelShowComments, IDC_SHOW_COMMENTS_SIDE_PANEL) \
   E(kActionSidePanelShowCustomizeChrome) \

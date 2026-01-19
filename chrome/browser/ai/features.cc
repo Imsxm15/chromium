@@ -6,6 +6,24 @@
 
 namespace features {
 
+BASE_FEATURE(kAiSidePanel, "AiSidePanel", base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiLocalSummaries,
+             "AiLocalSummaries",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiComparePages,
+             "AiComparePages",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiAnchoredNotes,
+             "AiAnchoredNotes",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiProjects, "AiProjects", base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiAgentActions,
+             "AiAgentActions",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kAiSecurityInsights,
+             "AiSecurityInsights",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
 BASE_FEATURE(kAILanguageModelOverrideConfiguration,
              "kAILanguageModelOverrideConfiguration",
              base::FEATURE_ENABLED_BY_DEFAULT);

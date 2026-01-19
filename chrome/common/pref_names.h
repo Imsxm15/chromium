@@ -44,6 +44,31 @@ inline constexpr char kSafeBrowsingForTrustedSourcesEnabled[] =
 // handling code reads local state, while extension APIs use profile pref.
 inline constexpr char kDisableScreenshots[] = "disable_screenshots";
 
+// Whether the AI experience is enabled for the profile.
+inline constexpr char kAiEnabled[] = "ai.enabled";
+
+// Whether the AI side panel entry is enabled.
+inline constexpr char kAiSidePanelEnabled[] = "ai.side_panel.enabled";
+
+// Whether remote AI requests are allowed. Defaults to false.
+inline constexpr char kAiAllowRemoteRequests[] = "ai.allow_remote_requests";
+
+// Retention duration for AI data, in days. 0 means session-only.
+inline constexpr char kAiDataRetentionDays[] = "ai.data_retention_days";
+
+// Whether anchored notes are enabled.
+inline constexpr char kAiNotesEnabled[] = "ai.notes.enabled";
+
+// Whether AI projects are enabled.
+inline constexpr char kAiProjectsEnabled[] = "ai.projects.enabled";
+
+// Whether semantic history indexing is enabled.
+inline constexpr char kAiSemanticHistoryEnabled[] =
+    "ai.semantic_history.enabled";
+
+// Expiration time for AI-driven permissions, in days.
+inline constexpr char kAiPermissionsExpireDays[] = "ai.permissions.expire_days";
+
 // A boolean specifying whether the partial download bubble (which shows up
 // automatically when downloads are complete) should be enabled. True (partial
 // bubble will show automatically) by default.
