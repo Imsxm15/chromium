@@ -8,8 +8,23 @@
 #include "chrome/browser/ui/webui/top_chrome/top_chrome_web_ui_controller.h"
 #include "chrome/browser/ui/webui/top_chrome/top_chrome_webui_config.h"
 #include "chrome/common/webui_url_constants.h"
+#include "content/public/browser/web_ui_message_handler.h"
 
 class AiSidePanelUI;
+
+class AiSidePanelMessageHandler : public content::WebUIMessageHandler {
+ public:
+  AiSidePanelMessageHandler();
+  AiSidePanelMessageHandler(const AiSidePanelMessageHandler&) = delete;
+  AiSidePanelMessageHandler& operator=(const AiSidePanelMessageHandler&) =
+      delete;
+  ~AiSidePanelMessageHandler() override;
+
+  void RegisterMessages() override;
+
+ private:
+  void HandleGetLocalSummary(const base::Value::List& args);
+};
 
 class AiSidePanelUIConfig : public DefaultTopChromeWebUIConfig<AiSidePanelUI> {
  public:

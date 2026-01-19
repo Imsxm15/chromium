@@ -4535,6 +4535,33 @@
   <message name="IDS_SETTINGS_AI_SUBPAGE_FEATURE_MANAGED_DISABLED_LABEL" desc="This is an indicator on the top of the AI feature settings subpage, which informs the user that this feature is not available because it was turned off by their organization. The tone should be informative.">
     This feature is disabled by your organization
   </message>
+  <message name="IDS_SETTINGS_AI_DATA_SECTION_TITLE" desc="Section title for AI data and privacy settings.">
+    AI data and privacy
+  </message>
+  <message name="IDS_SETTINGS_AI_DATA_SECTION_DESCRIPTION" desc="Description text for AI data and privacy settings.">
+    AI features run locally by default. Remote requests require explicit opt-in.
+  </message>
+  <message name="IDS_SETTINGS_AI_ENABLED_LABEL" desc="Label for the toggle that enables AI features.">
+    Enable AI features
+  </message>
+  <message name="IDS_SETTINGS_AI_SIDE_PANEL_ENABLED_LABEL" desc="Label for the toggle that enables the AI side panel.">
+    Enable AI side panel
+  </message>
+  <message name="IDS_SETTINGS_AI_ALLOW_REMOTE_LABEL" desc="Label for the toggle that allows remote AI requests.">
+    Allow remote AI requests
+  </message>
+  <message name="IDS_SETTINGS_AI_RETENTION_LABEL" desc="Label for the AI data retention days input.">
+    Data retention (days)
+  </message>
+  <message name="IDS_SETTINGS_AI_PURGE_DESCRIPTION" desc="Description of the purge button for AI data.">
+    Purge locally stored AI data.
+  </message>
+  <message name="IDS_SETTINGS_AI_PURGE_BUTTON" desc="Label for the AI data purge button.">
+    Purge AI data
+  </message>
+  <message name="IDS_SETTINGS_AI_PURGE_TOAST" desc="Toast text shown after AI data is purged.">
+    AI data cleared
+  </message>
 
   <!-- Experimental settings - Tab Organization -->
   <message name="IDS_SETTINGS_EXPERIMENTAL_ADVANCED_FEATURE2_LABEL" desc="Toggle primary description">

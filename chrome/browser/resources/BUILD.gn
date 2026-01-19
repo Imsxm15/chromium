@@ -75,6 +75,7 @@ group("resources") {
       "side_panel/reading_list:resources",
       "side_panel/shared:resources",
       "ai_side_panel:resources",
+      "ai_internals:resources",
       "signin:resources",
       "suggest_internals:resources",
       "support_tool:resources",

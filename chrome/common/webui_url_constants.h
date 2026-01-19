@@ -363,6 +363,8 @@ inline constexpr char kChromeUIAppServiceInternalsHost[] =
     "app-service-internals";
 inline constexpr char kChromeUIAutofillMlInternalsHost[] =
     "autofill-ml-internals";
+inline constexpr char kChromeUIAiInternalsHost[] = "ai-internals";
+inline constexpr char kChromeUIAiInternalsURL[] = "chrome://ai-internals/";
 inline constexpr char kChromeUIBookmarksSidePanelHost[] =
     "bookmarks-side-panel.top-chrome";
 inline constexpr char kChromeUIBookmarksSidePanelURL[] =
