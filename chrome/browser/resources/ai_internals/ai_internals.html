@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AI Internals</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, sans-serif;
+    }
+    body {
+      margin: 16px;
+    }
+    h1 {
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+    table {
+      border-collapse: collapse;
+      font-size: 13px;
+      width: 100%;
+    }
+    td {
+      border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+      padding: 6px 0;
+    }
+    td:first-child {
+      font-weight: 600;
+      width: 240px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Internals</h1>
+  <table>
+    <tr>
+      <td>AI enabled</td>
+      <td id="aiEnabled"></td>
+    </tr>
+    <tr>
+      <td>AI side panel enabled</td>
+      <td id="aiSidePanelEnabled"></td>
+    </tr>
+    <tr>
+      <td>Remote requests allowed</td>
+      <td id="allowRemoteRequests"></td>
+    </tr>
+    <tr>
+      <td>Data retention (days)</td>
+      <td id="dataRetentionDays"></td>
+    </tr>
+  </table>
+  <script type="module">
+    import {loadTimeData} from 'chrome://resources/js/load_time_data.m.js';
+
+    const boolValue = value => (value ? 'true' : 'false');
+    document.getElementById('aiEnabled').textContent =
+        boolValue(loadTimeData.getBoolean('aiEnabled'));
+    document.getElementById('aiSidePanelEnabled').textContent =
+        boolValue(loadTimeData.getBoolean('aiSidePanelEnabled'));
+    document.getElementById('allowRemoteRequests').textContent =
+        boolValue(loadTimeData.getBoolean('allowRemoteRequests'));
+    document.getElementById('dataRetentionDays').textContent =
+        loadTimeData.getInteger('dataRetentionDays');
+  </script>
+</body>
+</html>

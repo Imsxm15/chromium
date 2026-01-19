@@ -9391,6 +9391,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
       <message name="IDS_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL" desc="The title of the menu item for showing the Customize Chrome side panel.">
         Customize Chrome
       </message>
+      <message name="IDS_AI_SIDE_PANEL_TITLE" desc="The title of the menu item for showing the AI side panel.">
+        AI Side Panel
+      </message>
       <if expr="use_titlecase">
         <message name="IDS_SHOW_CUSTOMIZE_CHROME_TOOLBAR" desc="The title of the menu item for showing the toolbar section of the Customize Chrome side panel.">
           Customize Toolbar
