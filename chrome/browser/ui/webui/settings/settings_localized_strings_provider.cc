@@ -382,6 +382,15 @@ void AddAiStrings(content::WebUIDataSource* html_source) {
        IDS_SETTINGS_AI_SUBPAGE_SUBLABEL_LOGGING_MANAGED_DISABLED},
       {"aiSubpageFeatureManagedDisabledLabel",
        IDS_SETTINGS_AI_SUBPAGE_FEATURE_MANAGED_DISABLED_LABEL},
+      {"aiDataSectionTitle", IDS_SETTINGS_AI_DATA_SECTION_TITLE},
+      {"aiDataSectionDescription", IDS_SETTINGS_AI_DATA_SECTION_DESCRIPTION},
+      {"aiEnabledLabel", IDS_SETTINGS_AI_ENABLED_LABEL},
+      {"aiSidePanelEnabledLabel", IDS_SETTINGS_AI_SIDE_PANEL_ENABLED_LABEL},
+      {"aiAllowRemoteLabel", IDS_SETTINGS_AI_ALLOW_REMOTE_LABEL},
+      {"aiRetentionLabel", IDS_SETTINGS_AI_RETENTION_LABEL},
+      {"aiPurgeDescription", IDS_SETTINGS_AI_PURGE_DESCRIPTION},
+      {"aiPurgeButton", IDS_SETTINGS_AI_PURGE_BUTTON},
+      {"aiPurgeToast", IDS_SETTINGS_AI_PURGE_TOAST},
 
       // History search strings.
       {"historySearchSettingLabel", IDS_SETTINGS_HISTORY_SEARCH_SETTING_LABEL},
