@@ -7,13 +7,9 @@ import("//ui/webui/resources/tools/build_webui.gni")
 assert(!is_android)
 
 build_webui("build") {
-  grd_prefix = "ai_side_panel"
+  grd_prefix = "ai_internals"
 
-  static_files = [ "ai_side_panel.html" ]
-
-  ts_files = [ "ai_side_panel.ts" ]
-
-  ts_deps = [ "//ui/webui/resources/js:build_ts" ]
+  static_files = [ "ai_internals.html" ]
 
   webui_context_type = "trusted"
 }
