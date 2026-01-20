@@ -24,6 +24,8 @@ class AiSidePanelMessageHandler : public content::WebUIMessageHandler {
 
  private:
   void HandleGetLocalSummary(const base::Value::List& args);
+  void HandleGetTabList(const base::Value::List& args);
+  void HandleCompareTabs(const base::Value::List& args);
 };
 
 class AiSidePanelUIConfig : public DefaultTopChromeWebUIConfig<AiSidePanelUI> {

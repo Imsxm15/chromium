@@ -6,9 +6,11 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include "base/feature_list.h"
 #include "base/strings/stringprintf.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
 #include "base/values.h"
 #include "chrome/browser/ai/features.h"
@@ -31,10 +33,70 @@ base::Value::Dict BuildTabData(content::WebContents* contents) {
   base::Value::Dict tab;
   tab.Set("title", contents->GetTitle());
   tab.Set("url", contents->GetVisibleURL().spec());
+  tab.Set("host", contents->GetVisibleURL().host());
   tab.Set("minutesSinceLastActive",
           (base::TimeTicks::Now() - contents->GetLastActiveTimeTicks())
               .InMinutes());
   return tab;
+}
+
+base::Value::List BuildTabList(Browser* browser) {
+  base::Value::List tabs;
+  TabStripModel* tab_strip_model = browser->tab_strip_model();
+  for (int index = 0; index < tab_strip_model->count(); ++index) {
+    content::WebContents* contents = tab_strip_model->GetWebContentsAt(index);
+    if (!contents) {
+      continue;
+    }
+    base::Value::Dict tab = BuildTabData(contents);
+    tab.Set("index", index);
+    tabs.Append(std::move(tab));
+  }
+  return tabs;
+}
+
+base::Value::Dict BuildCompareResult(Browser* browser,
+                                     const std::vector<int>& tab_indices) {
+  base::Value::List rows;
+  std::string markdown = "| Title | URL | Host |\n| --- | --- | --- |\n";
+  std::string csv = "Title,URL,Host\n";
+  TabStripModel* tab_strip_model = browser->tab_strip_model();
+  for (int index : tab_indices) {
+    if (index < 0 || index >= tab_strip_model->count()) {
+      continue;
+    }
+    content::WebContents* contents = tab_strip_model->GetWebContentsAt(index);
+    if (!contents) {
+      continue;
+    }
+    const std::string title = base::UTF16ToUTF8(contents->GetTitle());
+    const std::string url = contents->GetVisibleURL().spec();
+    const std::string host = contents->GetVisibleURL().host();
+
+    base::Value::Dict row;
+    row.Set("title", title);
+    row.Set("url", url);
+    row.Set("host", host);
+    rows.Append(std::move(row));
+
+    markdown.append("| " + title + " | " + url + " | " + host + " |\n");
+    csv.append("\"" + title + "\",\"" + url + "\",\"" + host + "\"\n");
+  }
+
+  base::Value::List notes;
+  if (rows.empty()) {
+    notes.Append("No tabs selected for comparison.");
+  } else {
+    notes.Append("Comparison is based on title and URL only.");
+    notes.Append("Missing data: page content features not collected yet.");
+  }
+
+  base::Value::Dict result;
+  result.Set("rows", std::move(rows));
+  result.Set("markdown", markdown);
+  result.Set("csv", csv);
+  result.Set("notes", std::move(notes));
+  return result;
 }
 
 base::Value::Dict BuildLocalSummary(Browser* browser) {
@@ -87,6 +149,14 @@ void AiSidePanelMessageHandler::RegisterMessages() {
       "getAiLocalSummary",
       base::BindRepeating(&AiSidePanelMessageHandler::HandleGetLocalSummary,
                           base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "getAiTabList",
+      base::BindRepeating(&AiSidePanelMessageHandler::HandleGetTabList,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "compareAiTabs",
+      base::BindRepeating(&AiSidePanelMessageHandler::HandleCompareTabs,
+                          base::Unretained(this)));
 }
 
 void AiSidePanelMessageHandler::HandleGetLocalSummary(
@@ -115,6 +185,61 @@ void AiSidePanelMessageHandler::HandleGetLocalSummary(
   }
 
   ResolveJavascriptCallback(callback_id, BuildLocalSummary(browser));
+}
+
+void AiSidePanelMessageHandler::HandleGetTabList(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::List());
+    return;
+  }
+
+  ResolveJavascriptCallback(callback_id, BuildTabList(browser));
+}
+
+void AiSidePanelMessageHandler::HandleCompareTabs(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 2u);
+  const base::Value& callback_id = args[0];
+  const base::Value::List& selected = args[1].GetList();
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const bool compare_enabled =
+      base::FeatureList::IsEnabled(features::kAiComparePages) &&
+      prefs->GetBoolean(prefs::kAiEnabled) &&
+      prefs->GetBoolean(prefs::kAiSidePanelEnabled);
+  if (!compare_enabled) {
+    base::Value::Dict error;
+    error.Set("error", "Compare is disabled.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  std::vector<int> tab_indices;
+  tab_indices.reserve(selected.size());
+  for (const auto& value : selected) {
+    if (!value.is_int()) {
+      continue;
+    }
+    tab_indices.push_back(value.GetInt());
+  }
+
+  ResolveJavascriptCallback(callback_id,
+                            BuildCompareResult(browser, tab_indices));
 }
 
 AiSidePanelUI::AiSidePanelUI(content::WebUI* web_ui)
