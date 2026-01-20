@@ -21,6 +21,12 @@ const agentStatus = document.querySelector<HTMLDivElement>('#agentStatus');
 const agentActionList =
     document.querySelector<HTMLDivElement>('#agentActionList');
 const agentLog = document.querySelector<HTMLDivElement>('#agentLog');
+const securityStatus =
+    document.querySelector<HTMLDivElement>('#securityStatus');
+const refreshSecurity =
+    document.querySelector<HTMLButtonElement>('#refreshSecurity');
+const securitySignals =
+    document.querySelector<HTMLDivElement>('#securitySignals');
 
 function renderSummary(lines: string[]) {
   if (!summaryOutput) {
@@ -167,6 +173,27 @@ function renderAgentActions(actions: Array<{id: string, type: string, label: str
   }
 }
 
+function renderSecurityStatus(message: string) {
+  if (!securityStatus) {
+    return;
+  }
+  securityStatus.textContent = message;
+}
+
+function renderSecuritySignals(signals: string[]) {
+  if (!securitySignals) {
+    return;
+  }
+  securitySignals.textContent = '';
+  const ul = document.createElement('ul');
+  for (const signal of signals) {
+    const li = document.createElement('li');
+    li.textContent = signal;
+    ul.appendChild(li);
+  }
+  securitySignals.appendChild(ul);
+}
+
 summarizeButton?.addEventListener('click', async () => {
   const response = await sendWithPromise('getAiLocalSummary');
   if (response.error) {
@@ -223,3 +250,17 @@ async function loadAgentActions() {
 }
 
 loadAgentActions();
+
+async function refreshSecurityInsights() {
+  const response = await sendWithPromise('getAiSecurityInsights');
+  if (response.error) {
+    renderSecurityStatus(response.error);
+    renderSecuritySignals([]);
+    return;
+  }
+  renderSecurityStatus('');
+  renderSecuritySignals(response || []);
+}
+
+refreshSecurity?.addEventListener('click', refreshSecurityInsights);
+refreshSecurityInsights();

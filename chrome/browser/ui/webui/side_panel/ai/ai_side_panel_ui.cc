@@ -4,12 +4,14 @@
 
 #include "chrome/browser/ui/webui/side_panel/ai/ai_side_panel_ui.h"
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "base/feature_list.h"
 #include "base/strings/escape.h"
+#include "base/strings/string_util.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
@@ -169,6 +171,44 @@ base::Value::List BuildAgentActions() {
   return actions;
 }
 
+base::Value::List BuildSecurityInsights(const GURL& url) {
+  base::Value::List insights;
+  if (!url.is_valid()) {
+    insights.Append("URL is invalid.");
+    return insights;
+  }
+
+  if (!url.SchemeIsCryptographic()) {
+    insights.Append("Connection is not HTTPS.");
+  }
+
+  const std::string host = base::ToLowerASCII(url.host());
+  if (base::StartsWith(host, "xn--", base::CompareCase::SENSITIVE)) {
+    insights.Append("Hostname uses punycode.");
+  }
+  if (url.HostIsIPAddress()) {
+    insights.Append("Hostname is an IP address.");
+  }
+
+  const size_t dot_count = std::count(host.begin(), host.end(), '.');
+  if (dot_count >= 3) {
+    insights.Append("Hostname has multiple subdomains.");
+  }
+
+  const std::string path = base::ToLowerASCII(url.path());
+  if (path.find("login") != std::string::npos ||
+      path.find("signin") != std::string::npos ||
+      path.find("password") != std::string::npos ||
+      path.find("auth") != std::string::npos) {
+    insights.Append("Page path suggests authentication.");
+  }
+
+  if (insights.empty()) {
+    insights.Append("No obvious signals detected.");
+  }
+  return insights;
+}
+
 std::u16string BuildActionScript(const std::string& type,
                                  const std::string& selector,
                                  const std::string& value) {
@@ -222,6 +262,10 @@ void AiSidePanelMessageHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback(
       "executeAiAgentAction",
       base::BindRepeating(&AiSidePanelMessageHandler::HandleExecuteAgentAction,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "getAiSecurityInsights",
+      base::BindRepeating(&AiSidePanelMessageHandler::HandleGetSecurityInsights,
                           base::Unretained(this)));
 }
 
@@ -349,7 +393,8 @@ void AiSidePanelMessageHandler::HandleExecuteAgentAction(
     return;
   }
 
-  content::WebContents* target = browser->tab_strip_model()->GetActiveWebContents();
+  content::WebContents* target =
+      browser->tab_strip_model()->GetActiveWebContents();
   if (!target) {
     ResolveJavascriptCallback(callback_id, base::Value::Dict());
     return;
@@ -381,6 +426,41 @@ void AiSidePanelMessageHandler::OnActionScriptExecuted(
     response.Set("success", false);
   }
   ResolveJavascriptCallback(callback_id, std::move(response));
+}
+
+void AiSidePanelMessageHandler::HandleGetSecurityInsights(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::List());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const bool security_enabled =
+      base::FeatureList::IsEnabled(features::kAiSecurityInsights) &&
+      prefs->GetBoolean(prefs::kAiEnabled) &&
+      prefs->GetBoolean(prefs::kAiSidePanelEnabled);
+  if (!security_enabled) {
+    base::Value::Dict error;
+    error.Set("error", "Security insights are disabled.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  content::WebContents* target = browser->tab_strip_model()->GetActiveWebContents();
+  if (!target) {
+    ResolveJavascriptCallback(callback_id, base::Value::List());
+    return;
+  }
+
+  ResolveJavascriptCallback(callback_id,
+                            BuildSecurityInsights(target->GetVisibleURL()));
 }
 
 AiSidePanelUI::AiSidePanelUI(content::WebUI* web_ui)

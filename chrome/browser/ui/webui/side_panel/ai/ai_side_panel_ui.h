@@ -30,6 +30,7 @@ class AiSidePanelMessageHandler : public content::WebUIMessageHandler {
   void HandleGetAgentActions(const base::Value::List& args);
   void HandleExecuteAgentAction(const base::Value::List& args);
   void OnActionScriptExecuted(base::Value callback_id, base::Value result);
+  void HandleGetSecurityInsights(const base::Value::List& args);
 
   base::WeakPtrFactory<AiSidePanelMessageHandler> weak_factory_{this};
 };
