@@ -18,6 +18,7 @@
 #define SIDE_PANEL_ENTRY_IDS(V)                                               \
   /* Global Entries */                                                        \
   V(kReadingList, kActionSidePanelShowReadingList, "ReadingList")             \
+  V(kAiSidePanel, kActionSidePanelShowAiSidePanel, "AiSidePanel")             \
   V(kBookmarks, kActionSidePanelShowBookmarks, "Bookmarks")                   \
   V(kHistoryClusters, kActionSidePanelShowHistoryCluster, "HistoryClusters")  \
   V(kHistory, kActionSidePanelShowHistory, "History")                         \

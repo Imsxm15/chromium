@@ -4,12 +4,14 @@
 
 #include "chrome/browser/ui/views/side_panel/side_panel_util.h"
 
+#include "base/feature_list.h"
 #include "base/metrics/histogram_functions.h"
 #include "base/metrics/user_metrics.h"
 #include "base/metrics/user_metrics_action.h"
 #include "base/notreached.h"
 #include "base/strings/strcat.h"
 #include "base/time/time.h"
+#include "chrome/browser/ai/features.h"
 #include "chrome/browser/history_clusters/history_clusters_service_factory.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
@@ -26,11 +28,16 @@
 #include "chrome/browser/ui/views/side_panel/side_panel_coordinator.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_registry.h"
 #include "chrome/browser/ui/views/side_panel/side_panel_ui.h"
+#include "chrome/browser/ui/views/side_panel/side_panel_web_ui_view.h"
 #include "chrome/browser/ui/webui_browser/webui_browser.h"
+#include "chrome/browser/ui/webui/side_panel/ai/ai_side_panel_ui.h"
 #include "chrome/common/chrome_features.h"
+#include "chrome/common/pref_names.h"
+#include "chrome/common/webui_url_constants.h"
 #include "components/history_clusters/core/features.h"
 #include "components/history_clusters/core/history_clusters_service.h"
 #include "components/prefs/pref_service.h"
+#include "chrome/grit/generated_resources.h"
 #include "ui/accessibility/accessibility_features.h"
 #include "ui/actions/actions.h"
 
@@ -40,6 +47,17 @@
 #endif
 
 namespace {
+
+std::unique_ptr<views::View> CreateAiSidePanelWebView(
+    Browser* browser,
+    SidePanelEntryScope& scope) {
+  return std::make_unique<SidePanelWebUIViewT<AiSidePanelUI>>(
+      scope, base::RepeatingClosure(), base::RepeatingClosure(),
+      std::make_unique<WebUIContentsWrapperT<AiSidePanelUI>>(
+          GURL(chrome::kChromeUIAiSidePanelURL), browser->profile(),
+          IDS_AI_SIDE_PANEL_TITLE,
+          /*esc_closes_ui=*/false));
+}
 
 std::string_view GetSidePanelNameFor(SidePanelEntry::PanelType panel_type) {
   switch (panel_type) {
@@ -76,6 +94,15 @@ void SidePanelUtil::PopulateGlobalEntries(Browser* browser,
   browser->browser_window_features()
       ->reading_list_side_panel_coordinator()
       ->CreateAndRegisterEntry(window_registry);
+
+  if (base::FeatureList::IsEnabled(features::kAiSidePanel) &&
+      browser->profile()->GetPrefs()->GetBoolean(prefs::kAiEnabled) &&
+      browser->profile()->GetPrefs()->GetBoolean(prefs::kAiSidePanelEnabled)) {
+    window_registry->Register(std::make_unique<SidePanelEntry>(
+        SidePanelEntry::Key(SidePanelEntry::Id::kAiSidePanel),
+        base::BindRepeating(&CreateAiSidePanelWebView, browser),
+        /*default_content_width_callback=*/base::NullCallback()));
+  }
 
   // Add bookmarks.
   browser->browser_window_features()
