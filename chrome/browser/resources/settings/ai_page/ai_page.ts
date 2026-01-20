@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 import 'chrome://resources/cr_elements/cr_link_row/cr_link_row.js';
+import 'chrome://resources/cr_elements/cr_button/cr_button.js';
+import 'chrome://resources/cr_elements/cr_input/cr_input.js';
+import 'chrome://resources/cr_elements/cr_toast/cr_toast.js';
+import '../controls/settings_toggle_button.js';
 import '../settings_page/settings_section.js';
 
 import {PrefsMixin} from '/shared/settings/prefs/prefs_mixin.js';
@@ -10,6 +14,7 @@ import {assert, assertNotReached} from 'chrome://resources/js/assert.js';
 import {OpenWindowProxyImpl} from 'chrome://resources/js/open_window_proxy.js';
 import {PolymerElement} from 'chrome://resources/polymer/v3_0/polymer/polymer_bundled.min.js';
 
+import type {CrToastElement} from 'chrome://resources/cr_elements/cr_toast/cr_toast.js';
 import {loadTimeData} from '../i18n_setup.js';
 import type {MetricsBrowserProxy} from '../metrics_browser_proxy.js';
 import {AiPageInteractions, MetricsBrowserProxyImpl} from '../metrics_browser_proxy.js';
@@ -19,6 +24,12 @@ import {SettingsViewMixin} from '../settings_page/settings_view_mixin.js';
 
 import {getTemplate} from './ai_page.html.js';
 import {FeatureOptInState, SettingsAiPageFeaturePrefName} from './constants.js';
+
+export interface SettingsAiPageElement {
+  $: {
+    aiDataToast: CrToastElement,
+  };
+}
 
 const SettingsAiPageElementBase = SettingsViewMixin(PrefsMixin(PolymerElement));
 export class SettingsAiPageElement extends SettingsAiPageElementBase {
@@ -140,6 +151,20 @@ export class SettingsAiPageElement extends SettingsAiPageElementBase {
 
     OpenWindowProxyImpl.getInstance().openUrl(
         loadTimeData.getString('passwordChangeSettingsUrl'));
+  }
+
+  private onRetentionDaysChange_(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const parsed = Number.parseInt(target.value, 10);
+    const value = Number.isNaN(parsed) ? 0 : Math.max(parsed, 0);
+    this.setPrefValue('ai.data_retention_days', value);
+    target.value = value.toString();
+  }
+
+  private onPurgeDataClick_() {
+    this.setPrefValue('ai.allow_remote_requests', false);
+    this.setPrefValue('ai.data_retention_days', 0);
+    this.$.aiDataToast.show();
   }
 
   private recordInteractionMetrics_(

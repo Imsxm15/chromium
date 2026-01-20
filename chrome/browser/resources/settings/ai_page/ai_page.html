@@ -45,3 +45,45 @@
     </cr-link-row>
   </div>
 </settings-section>
+
+<settings-section page-title="$i18n{aiDataSectionTitle}">
+  <div class="cr-secondary-text">
+    $i18n{aiDataSectionDescription}
+  </div>
+  <settings-toggle-button class="hr"
+      pref="{{prefs.ai.enabled}}"
+      label="$i18n{aiEnabledLabel}">
+  </settings-toggle-button>
+  <settings-toggle-button class="hr"
+      pref="{{prefs.ai.side_panel.enabled}}"
+      label="$i18n{aiSidePanelEnabledLabel}">
+  </settings-toggle-button>
+  <settings-toggle-button class="hr"
+      pref="{{prefs.ai.allow_remote_requests}}"
+      label="$i18n{aiAllowRemoteLabel}">
+  </settings-toggle-button>
+  <div class="cr-row">
+    <div class="flex cr-padded-text">
+      <div id="aiRetentionLabel">$i18n{aiRetentionLabel}</div>
+    </div>
+    <div class="separator"></div>
+    <cr-input id="aiRetentionInput"
+        type="number"
+        aria-labelledby="aiRetentionLabel"
+        value="[[prefs.ai.data_retention_days.value]]"
+        on-change="onRetentionDaysChange_">
+    </cr-input>
+  </div>
+  <div class="cr-row">
+    <div class="flex cr-padded-text">
+      $i18n{aiPurgeDescription}
+    </div>
+    <div class="separator"></div>
+    <cr-button id="aiPurgeButton" on-click="onPurgeDataClick_">
+      $i18n{aiPurgeButton}
+    </cr-button>
+  </div>
+  <cr-toast id="aiDataToast" duration="2000">
+    $i18n{aiPurgeToast}
+  </cr-toast>
+</settings-section>
