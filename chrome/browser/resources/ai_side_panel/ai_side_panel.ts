@@ -27,6 +27,27 @@ const refreshSecurity =
     document.querySelector<HTMLButtonElement>('#refreshSecurity');
 const securitySignals =
     document.querySelector<HTMLDivElement>('#securitySignals');
+const remoteEndpoint =
+    document.querySelector<HTMLInputElement>('#remoteEndpoint');
+const remoteApiKey = document.querySelector<HTMLInputElement>('#remoteApiKey');
+const remoteKeyState =
+    document.querySelector<HTMLDivElement>('#remoteKeyState');
+const saveRemoteSettings =
+    document.querySelector<HTMLButtonElement>('#saveRemoteSettings');
+const clearRemoteKey =
+    document.querySelector<HTMLButtonElement>('#clearRemoteKey');
+const remoteSettingsStatus =
+    document.querySelector<HTMLDivElement>('#remoteSettingsStatus');
+const remotePreviewWarning =
+    document.querySelector<HTMLDivElement>('#remotePreviewWarning');
+const remotePreview =
+    document.querySelector<HTMLPreElement>('#remotePreview');
+const remoteAnalyze =
+    document.querySelector<HTMLButtonElement>('#remoteAnalyze');
+const remoteConfirm =
+    document.querySelector<HTMLButtonElement>('#remoteConfirm');
+const remoteResult =
+    document.querySelector<HTMLDivElement>('#remoteResult');
 
 function renderSummary(lines: string[]) {
   if (!summaryOutput) {
@@ -194,6 +215,41 @@ function renderSecuritySignals(signals: string[]) {
   securitySignals.appendChild(ul);
 }
 
+function renderRemoteSettingsStatus(message: string) {
+  if (!remoteSettingsStatus) {
+    return;
+  }
+  remoteSettingsStatus.textContent = message;
+}
+
+function renderRemoteKeyState(message: string) {
+  if (!remoteKeyState) {
+    return;
+  }
+  remoteKeyState.textContent = message;
+}
+
+function renderRemotePreview(data: unknown) {
+  if (!remotePreview) {
+    return;
+  }
+  remotePreview.textContent = JSON.stringify(data, null, 2);
+}
+
+function renderRemotePreviewWarning(message: string) {
+  if (!remotePreviewWarning) {
+    return;
+  }
+  remotePreviewWarning.textContent = message;
+}
+
+function renderRemoteResult(message: string) {
+  if (!remoteResult) {
+    return;
+  }
+  remoteResult.textContent = message;
+}
+
 summarizeButton?.addEventListener('click', async () => {
   const response = await sendWithPromise('getAiLocalSummary');
   if (response.error) {
@@ -217,7 +273,8 @@ compareButton?.addEventListener('click', async () => {
     return;
   }
   const selected: number[] = [];
-  const inputs = compareTabList.querySelectorAll<HTMLInputElement>('input[type=checkbox]');
+  const inputs =
+      compareTabList.querySelectorAll<HTMLInputElement>('input[type=checkbox]');
   inputs.forEach(input => {
     if (input.checked) {
       selected.push(Number.parseInt(input.value, 10));
@@ -264,3 +321,85 @@ async function refreshSecurityInsights() {
 
 refreshSecurity?.addEventListener('click', refreshSecurityInsights);
 refreshSecurityInsights();
+
+async function loadRemoteSettings() {
+  const response = await sendWithPromise('getAiRemoteModelSettings');
+  if (response.error) {
+    renderRemoteSettingsStatus(response.error);
+    return;
+  }
+  if (remoteEndpoint) {
+    remoteEndpoint.value = response.endpoint || '';
+  }
+  const hasKey = Boolean(response.hasKey);
+  renderRemoteKeyState(
+      hasKey ? 'Clé enregistrée.' : 'Aucune clé enregistrée.');
+  renderRemoteSettingsStatus(
+      response.allowRemote ?
+          'Les requêtes distantes sont autorisées.' :
+          'Les requêtes distantes sont désactivées dans les paramètres.');
+}
+
+saveRemoteSettings?.addEventListener('click', async () => {
+  const payload: {endpoint?: string, apiKey?: string, clearKey?: boolean} = {};
+  if (remoteEndpoint) {
+    payload.endpoint = remoteEndpoint.value.trim();
+  }
+  if (remoteApiKey && remoteApiKey.value.trim()) {
+    payload.apiKey = remoteApiKey.value.trim();
+  }
+  const response = await sendWithPromise('setAiRemoteModelSettings', payload);
+  if (response.error) {
+    renderRemoteSettingsStatus(response.error);
+    return;
+  }
+  const hasKey = Boolean(response.hasKey);
+  renderRemoteKeyState(
+      hasKey ? 'Clé enregistrée.' : 'Aucune clé enregistrée.');
+  renderRemoteSettingsStatus('Configuration enregistrée.');
+  if (remoteApiKey) {
+    remoteApiKey.value = '';
+  }
+});
+
+clearRemoteKey?.addEventListener('click', async () => {
+  const response = await sendWithPromise(
+      'setAiRemoteModelSettings', {clearKey: true});
+  if (response.error) {
+    renderRemoteSettingsStatus(response.error);
+    return;
+  }
+  renderRemoteKeyState('Aucune clé enregistrée.');
+  renderRemoteSettingsStatus('Clé supprimée.');
+});
+
+remoteAnalyze?.addEventListener('click', async () => {
+  renderRemoteResult('');
+  const response = await sendWithPromise('getAiRemoteAnalysisPreview');
+  if (response.error) {
+    renderRemotePreviewWarning(response.error);
+    renderRemotePreview({});
+    if (remoteConfirm) {
+      remoteConfirm.disabled = true;
+    }
+    return;
+  }
+  renderRemotePreviewWarning(
+      'Avertissement: cette action envoie les données ci-dessous à un '
+      + 'fournisseur externe. Vérifiez avant de confirmer.');
+  renderRemotePreview(response);
+  if (remoteConfirm) {
+    remoteConfirm.disabled = false;
+  }
+});
+
+remoteConfirm?.addEventListener('click', async () => {
+  const response = await sendWithPromise('requestAiRemoteAnalysis');
+  if (response.error) {
+    renderRemoteResult(response.error);
+    return;
+  }
+  renderRemoteResult(JSON.stringify(response, null, 2));
+});
+
+loadRemoteSettings();

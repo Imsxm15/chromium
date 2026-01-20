@@ -1653,6 +1653,8 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
   registry->RegisterBooleanPref(prefs::kAiEnabled, false);
   registry->RegisterBooleanPref(prefs::kAiSidePanelEnabled, false);
   registry->RegisterBooleanPref(prefs::kAiAllowRemoteRequests, false);
+  registry->RegisterStringPref(prefs::kAiRemoteEndpoint, std::string());
+  registry->RegisterStringPref(prefs::kAiRemoteApiKey, std::string());
   registry->RegisterIntegerPref(prefs::kAiDataRetentionDays, 0);
   registry->RegisterBooleanPref(prefs::kAiNotesEnabled, false);
   registry->RegisterBooleanPref(prefs::kAiProjectsEnabled, false);

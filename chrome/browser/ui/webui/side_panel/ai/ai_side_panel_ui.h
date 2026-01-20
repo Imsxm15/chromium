@@ -31,6 +31,10 @@ class AiSidePanelMessageHandler : public content::WebUIMessageHandler {
   void HandleExecuteAgentAction(const base::Value::List& args);
   void OnActionScriptExecuted(base::Value callback_id, base::Value result);
   void HandleGetSecurityInsights(const base::Value::List& args);
+  void HandleGetRemoteModelSettings(const base::Value::List& args);
+  void HandleSetRemoteModelSettings(const base::Value::List& args);
+  void HandleGetRemoteAnalysisPreview(const base::Value::List& args);
+  void HandleRequestRemoteAnalysis(const base::Value::List& args);
 
   base::WeakPtrFactory<AiSidePanelMessageHandler> weak_factory_{this};
 };

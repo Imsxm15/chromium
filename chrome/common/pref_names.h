@@ -53,6 +53,12 @@ inline constexpr char kAiSidePanelEnabled[] = "ai.side_panel.enabled";
 // Whether remote AI requests are allowed. Defaults to false.
 inline constexpr char kAiAllowRemoteRequests[] = "ai.allow_remote_requests";
 
+// Optional remote model endpoint.
+inline constexpr char kAiRemoteEndpoint[] = "ai.remote_endpoint";
+
+// Encrypted remote model API key.
+inline constexpr char kAiRemoteApiKey[] = "ai.remote_api_key";
+
 // Retention duration for AI data, in days. 0 means session-only.
 inline constexpr char kAiDataRetentionDays[] = "ai.data_retention_days";
 

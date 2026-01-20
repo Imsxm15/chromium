@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@
 #include "base/time/time.h"
 #include "base/values.h"
 #include "chrome/browser/ai/features.h"
+#include "chrome/browser/ai/ai_model_provider.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
@@ -267,6 +269,26 @@ void AiSidePanelMessageHandler::RegisterMessages() {
       "getAiSecurityInsights",
       base::BindRepeating(&AiSidePanelMessageHandler::HandleGetSecurityInsights,
                           base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "getAiRemoteModelSettings",
+      base::BindRepeating(
+          &AiSidePanelMessageHandler::HandleGetRemoteModelSettings,
+          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "setAiRemoteModelSettings",
+      base::BindRepeating(
+          &AiSidePanelMessageHandler::HandleSetRemoteModelSettings,
+          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "getAiRemoteAnalysisPreview",
+      base::BindRepeating(
+          &AiSidePanelMessageHandler::HandleGetRemoteAnalysisPreview,
+          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "requestAiRemoteAnalysis",
+      base::BindRepeating(
+          &AiSidePanelMessageHandler::HandleRequestRemoteAnalysis,
+          base::Unretained(this)));
 }
 
 void AiSidePanelMessageHandler::HandleGetLocalSummary(
@@ -461,6 +483,169 @@ void AiSidePanelMessageHandler::HandleGetSecurityInsights(
 
   ResolveJavascriptCallback(callback_id,
                             BuildSecurityInsights(target->GetVisibleURL()));
+}
+
+void AiSidePanelMessageHandler::HandleGetRemoteModelSettings(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  base::Value::Dict response;
+  response.Set("endpoint", prefs->GetString(prefs::kAiRemoteEndpoint));
+  response.Set("allowRemote",
+               prefs->GetBoolean(prefs::kAiAllowRemoteRequests));
+  response.Set("hasKey", !GetAiRemoteApiKey(prefs).empty());
+  ResolveJavascriptCallback(callback_id, std::move(response));
+}
+
+void AiSidePanelMessageHandler::HandleSetRemoteModelSettings(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 2u);
+  const base::Value& callback_id = args[0];
+  const base::Value::Dict& payload = args[1].GetDict();
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const std::string* endpoint = payload.FindString("endpoint");
+  const std::string* api_key = payload.FindString("apiKey");
+  const std::optional<bool> clear_key = payload.FindBool("clearKey");
+
+  if (endpoint) {
+    prefs->SetString(prefs::kAiRemoteEndpoint, *endpoint);
+  }
+
+  if (clear_key.value_or(false)) {
+    ClearAiRemoteApiKey(prefs);
+  } else if (api_key && !api_key->empty()) {
+    if (!StoreAiRemoteApiKey(prefs, *api_key)) {
+      base::Value::Dict error;
+      error.Set("error", "Failed to store the API key.");
+      ResolveJavascriptCallback(callback_id, std::move(error));
+      return;
+    }
+  }
+
+  base::Value::Dict response;
+  response.Set("success", true);
+  response.Set("hasKey", !GetAiRemoteApiKey(prefs).empty());
+  ResolveJavascriptCallback(callback_id, std::move(response));
+}
+
+void AiSidePanelMessageHandler::HandleGetRemoteAnalysisPreview(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const bool ai_enabled = prefs->GetBoolean(prefs::kAiEnabled) &&
+                          prefs->GetBoolean(prefs::kAiSidePanelEnabled);
+  if (!ai_enabled) {
+    base::Value::Dict error;
+    error.Set("error", "AI features are disabled.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  content::WebContents* target =
+      browser->tab_strip_model()->GetActiveWebContents();
+  if (!target) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  std::unique_ptr<AiModelProvider> provider =
+      CreateAiModelProvider(browser->profile());
+  if (!provider->IsAvailable()) {
+    base::Value::Dict error;
+    error.Set("error", "Configure a remote endpoint and API key first.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  const std::string title = base::UTF16ToUTF8(target->GetTitle());
+  AiModelProvider::RemoteRequest request =
+      provider->BuildRemoteRequest(target->GetVisibleURL(), title);
+  base::Value::Dict response;
+  response.Set("endpoint", request.endpoint);
+  response.Set("headers", std::move(request.headers));
+  response.Set("payload", std::move(request.payload));
+  ResolveJavascriptCallback(callback_id, std::move(response));
+}
+
+void AiSidePanelMessageHandler::HandleRequestRemoteAnalysis(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const bool ai_enabled = prefs->GetBoolean(prefs::kAiEnabled) &&
+                          prefs->GetBoolean(prefs::kAiSidePanelEnabled);
+  if (!ai_enabled) {
+    base::Value::Dict error;
+    error.Set("error", "AI features are disabled.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  if (!prefs->GetBoolean(prefs::kAiAllowRemoteRequests)) {
+    base::Value::Dict error;
+    error.Set("error", "Remote requests are disabled in settings.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  content::WebContents* target =
+      browser->tab_strip_model()->GetActiveWebContents();
+  if (!target) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  std::unique_ptr<AiModelProvider> provider =
+      CreateAiModelProvider(browser->profile());
+  if (!provider->IsAvailable()) {
+    base::Value::Dict error;
+    error.Set("error", "Remote provider is not configured.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  const std::string title = base::UTF16ToUTF8(target->GetTitle());
+  ResolveJavascriptCallback(
+      callback_id,
+      provider->RequestAnalysis(target->GetVisibleURL(), title));
 }
 
 AiSidePanelUI::AiSidePanelUI(content::WebUI* web_ui)

@@ -26,6 +26,20 @@
     .section {
       margin-top: 16px;
     }
+    pre {
+      background: color-mix(in srgb, Canvas 92%, transparent);
+      padding: 8px;
+      white-space: pre-wrap;
+    }
+    label {
+      display: block;
+      margin: 8px 0;
+    }
+    input[type="text"],
+    input[type="url"],
+    input[type="password"] {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
@@ -73,6 +87,35 @@
     <div id="securityStatus"></div>
     <button id="refreshSecurity">Refresh signals</button>
     <div id="securitySignals"></div>
+  </div>
+  <div class="section">
+    <h2>Analyse distante</h2>
+    <p>Configuration optionnelle. Rien n'est envoyé sans confirmation.</p>
+    <div class="section">
+      <h3>Configuration</h3>
+      <label>
+        Endpoint
+        <input id="remoteEndpoint" type="url"
+            placeholder="https://example.com/v1/chat/completions">
+      </label>
+      <label>
+        Clé API
+        <input id="remoteApiKey" type="password"
+            placeholder="Enregistrer une clé">
+      </label>
+      <div id="remoteKeyState"></div>
+      <button id="saveRemoteSettings">Enregistrer</button>
+      <button id="clearRemoteKey">Supprimer la clé</button>
+      <div id="remoteSettingsStatus"></div>
+    </div>
+    <div class="section">
+      <h3>Analyser avec IA distante</h3>
+      <div id="remotePreviewWarning"></div>
+      <pre id="remotePreview"></pre>
+      <button id="remoteAnalyze">Analyser avec IA distante</button>
+      <button id="remoteConfirm" disabled>Confirmer l'envoi</button>
+      <div id="remoteResult"></div>
+    </div>
   </div>
   <script type="module" src="ai_side_panel.js"></script>
 </body>

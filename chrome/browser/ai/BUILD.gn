@@ -17,6 +17,7 @@ source_set("ai") {
     "ai_data_keyed_service_factory.h",
     "ai_language_model.h",
     "ai_manager.h",
+    "ai_model_provider.h",
     "ai_on_device_session.h",
     "ai_proofreader.h",
     "ai_rewriter.h",
@@ -41,6 +42,7 @@ source_set("ai") {
     "//components/optimization_guide/core",
     "//components/update_client",
     "//content/public/browser",
+    "//url",
   ]
   if (enable_glic) {
     public_deps += [ "//chrome/browser/glic" ]
@@ -67,6 +69,7 @@ source_set("impl") {
     "ai_data_keyed_service_factory.cc",
     "ai_language_model.cc",
     "ai_manager.cc",
+    "ai_model_provider.cc",
     "ai_on_device_session.cc",
     "ai_proofreader.cc",
     "ai_rewriter.cc",
@@ -93,6 +96,7 @@ source_set("impl") {
     "//components/history_embeddings",
     "//components/language/core/common",
     "//components/optimization_guide/content/browser",
+    "//components/os_crypt",
     "//components/site_engagement/content",
     "//pdf:buildflags",
     "//skia",
