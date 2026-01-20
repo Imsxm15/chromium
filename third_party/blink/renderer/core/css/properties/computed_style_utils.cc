@@ -5180,37 +5180,38 @@ CSSValue* ComputedStyleUtils::ValueForPositionTryFallbacks(
 CSSValue* ComputedStyleUtils::ValueForFitText(const ComputedStyle& style,
                                               const FitText& fit_text) {
   CSSValueList* list = CSSValueList::CreateSpaceSeparated();
-  CSSValueID target_id;
+  CSSValueID type_id;
+  switch (fit_text.Type()) {
+    case FitTextType::kNone:
+      type_id = CSSValueID::kNone;
+      break;
+    case FitTextType::kGrow:
+      type_id = CSSValueID::kGrow;
+      break;
+    case FitTextType::kShrink:
+      type_id = CSSValueID::kShrink;
+      break;
+  }
+  list->Append(*CSSIdentifierValue::Create(type_id));
+  if (type_id == CSSValueID::kNone) {
+    return list;
+  }
+
   switch (fit_text.Target()) {
-    case FitTextTarget::kNone:
-      target_id = CSSValueID::kNone;
+    case FitTextTarget::kConsistent:
+      // It's a default value.
       break;
     case FitTextTarget::kPerLine:
-      target_id = CSSValueID::kPerLine;
+      list->Append(*CSSIdentifierValue::Create(CSSValueID::kPerLine));
       break;
-    case FitTextTarget::kConsistent:
-      target_id = CSSValueID::kConsistent;
-      break;
-  }
-  list->Append(*CSSIdentifierValue::Create(target_id));
-
-  switch (fit_text.Method()) {
-    case FitTextMethod::kScale:
-      // The default value.
-      break;
-    case FitTextMethod::kFontSize:
-      list->Append(*CSSIdentifierValue::Create(CSSValueID::kFontSize));
-      break;
-    case FitTextMethod::kScaleInline:
-      list->Append(*CSSIdentifierValue::Create(CSSValueID::kScaleInline));
-      break;
-    case FitTextMethod::kLetterSpacing:
-      list->Append(*CSSIdentifierValue::Create(CSSValueID::kLetterSpacing));
+    case FitTextTarget::kPerLineAll:
+      list->Append(*CSSIdentifierValue::Create(CSSValueID::kPerLineAll));
       break;
   }
 
-  if (auto size = fit_text.SizeLimit()) {
-    list->Append(*ZoomAdjustedPixelValue(*size, style));
+  if (auto limit = fit_text.ScaleFactorLimit()) {
+    list->Append(*CSSNumericLiteralValue::Create(
+        *limit * 100, CSSPrimitiveValue::UnitType::kPercentage));
   }
   return list;
 }

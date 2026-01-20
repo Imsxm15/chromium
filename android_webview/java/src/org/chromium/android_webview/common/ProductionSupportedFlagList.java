@@ -1049,9 +1049,6 @@ public final class ProductionSupportedFlagList {
                 BaseFeatures.USE_SHARED_REBIND_SERVICE_CONNECTION,
                 "Use a shared service connection to apply service group importance changes."),
         Flag.baseFeature(
-                AwFeatures.WEBVIEW_USE_RENDERING_HEURISTIC,
-                "Apply smoothing Skia options when WebView detects it's running on a TV device."),
-        Flag.baseFeature(
                 UiBaseFeatures.SEND_EMPTY_GESTURE_SCROLL_UPDATE,
                 "Send GestureScrollUpdates together with TouchMoves, including empty GSUs for 0"
                         + " delta moves."),
@@ -1195,11 +1192,6 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 BlinkFeatures.TEXT_SCALE_META_TAG,
                 "When enabled, <meta name=\"text-scale\" content=\"scale\"> takes effect"),
-        Flag.baseFeature(
-                CcFeatures.DROP_METRICS_FROM_NON_PRODUCED_FRAMES_ONLY_IF_THEY_HAD_NO_DAMAGE,
-                "Whether LayerTreeHostImpl::DidNotProduceFrame() should only drop event metrics"
-                        + " from frames that weren't produced due to no damage (but preserve event"
-                        + " metrics from frames that weren't produced for other reasons)."),
         // Add new commandline switches and features above. The final entry should have a
         // trailing comma for cleaner diffs.
 
@@ -1234,5 +1226,6 @@ public final class ProductionSupportedFlagList {
         Flag.baseFeature(
                 "UseLockFreeX509Verification",
                 "Enables lock-free certificate verification codepath."),
+        Flag.baseFeature(CcFeatures.REPORT_UKM, "Validate performance of UKM reporting."),
     };
 }

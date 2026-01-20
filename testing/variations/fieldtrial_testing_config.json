@@ -1195,7 +1195,6 @@
                     "enable_features": [
                         "AndroidWarmUpSpareRendererWithTimeout",
                         "OverrideAndroidOmniboxSpareRendererDelay",
-                        "ReportStuckThrottle",
                         "ResumeNavigationWithSpeculativeRFHProcessGone",
                         "SpareRendererProcessPriority"
                     ]
@@ -3619,6 +3618,21 @@
                     "name": "Enabled",
                     "enable_features": [
                         "AvatarButtonSyncPromo"
+                    ]
+                }
+            ]
+        }
+    ],
+    "AvoidDoubleMultiwindowChanges": [
+        {
+            "platforms": [
+                "android"
+            ],
+            "experiments": [
+                {
+                    "name": "Enabled",
+                    "enable_features": [
+                        "AvoidDoubleMultiwindowChanges"
                     ]
                 }
             ]
@@ -11390,6 +11404,21 @@
             ]
         }
     ],
+    "GeminiRefactoredFRE": [
+        {
+            "platforms": [
+                "ios"
+            ],
+            "experiments": [
+                {
+                    "name": "Enabled_GeminiRefactoredFRE",
+                    "enable_features": [
+                        "GeminiRefactoredFRE"
+                    ]
+                }
+            ]
+        }
+    ],
     "Glic1PTools": [
         {
             "platforms": [
@@ -12855,6 +12884,24 @@
             ]
         }
     ],
+    "HeliosBanana": [
+        {
+            "platforms": [
+                "ios"
+            ],
+            "experiments": [
+                {
+                    "name": "Enabled",
+                    "params": {
+                        "ShowFRERow": "true"
+                    },
+                    "enable_features": [
+                        "GeminiImageRemixTool"
+                    ]
+                }
+            ]
+        }
+    ],
     "HeliosFullChatHistory": [
         {
             "platforms": [
@@ -13869,6 +13916,27 @@
             ]
         }
     ],
+    "IOSKeyboardWillShowSuggestionRefresh": [
+        {
+            "platforms": [
+                "ios"
+            ],
+            "experiments": [
+                {
+                    "name": "Throttled",
+                    "enable_features": [
+                        "AutofillThrottleOptionalSuggestionRefresh"
+                    ]
+                },
+                {
+                    "name": "Suppressed",
+                    "enable_features": [
+                        "SuppressKeyboardWillShowSuggestionRefresh"
+                    ]
+                }
+            ]
+        }
+    ],
     "IOSLensFetchSrp": [
         {
             "platforms": [
@@ -14267,21 +14335,6 @@
                     "name": "Enabled",
                     "disable_features": [
                         "ImportPasswordsFromSafari"
-                    ]
-                }
-            ]
-        }
-    ],
-    "IOSSaveToDriveClientFolder": [
-        {
-            "platforms": [
-                "ios"
-            ],
-            "experiments": [
-                {
-                    "name": "Enabled",
-                    "enable_features": [
-                        "IOSSaveToDriveClientFolder"
                     ]
                 }
             ]
@@ -15081,8 +15134,8 @@
             ],
             "experiments": [
                 {
-                    "name": "Disabled",
-                    "disable_features": [
+                    "name": "Enabled",
+                    "enable_features": [
                         "JavalessRenderers"
                     ]
                 }
@@ -16094,6 +16147,22 @@
                     "name": "Enabled",
                     "enable_features": [
                         "MainNodeAnnotations"
+                    ]
+                }
+            ]
+        }
+    ],
+    "MaintainConnections": [
+        {
+            "platforms": [
+                "android",
+                "linux"
+            ],
+            "experiments": [
+                {
+                    "name": "Enabled",
+                    "enable_features": [
+                        "MaintainConnectionsOnIpv6TempAddrChange"
                     ]
                 }
             ]
@@ -25556,21 +25625,6 @@
             ]
         }
     ],
-    "TabFreezingUsesDiscard": [
-        {
-            "platforms": [
-                "android"
-            ],
-            "experiments": [
-                {
-                    "name": "Enabled",
-                    "enable_features": [
-                        "TabFreezingUsesDiscard"
-                    ]
-                }
-            ]
-        }
-    ],
     "TabGridEmptyThumbnail": [
         {
             "platforms": [
@@ -28746,6 +28800,21 @@
                     "name": "Enabled",
                     "enable_features": [
                         "WebViewInterceptedCookieHeader"
+                    ]
+                }
+            ]
+        }
+    ],
+    "WebViewLatchedCookiePolicy": [
+        {
+            "platforms": [
+                "android_webview"
+            ],
+            "experiments": [
+                {
+                    "name": "Enabled_20260116",
+                    "enable_features": [
+                        "WebViewLatchedCookiePolicy"
                     ]
                 }
             ]

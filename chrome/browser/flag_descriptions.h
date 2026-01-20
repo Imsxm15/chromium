@@ -2213,12 +2213,6 @@ inline constexpr char kAckCopyOutputRequestEarlyForViewTransitionDescription[] =
     "unblock navigation for ViewTransitions while CopyOutputRequests are in "
     "progress. This is a fast-path for ViewTransitions.";
 
-inline constexpr char kFluentOverlayScrollbarsName[] =
-    "Fluent Overlay scrollbars.";
-inline constexpr char kFluentOverlayScrollbarsDescription[] =
-    "Stylizes scrollbars with Microsoft Fluent design and makes them overlay "
-    "over the web's content.";
-
 inline constexpr char kFillOnAccountSelectName[] =
     "Fill passwords on account selection";
 inline constexpr char kFillOnAccountSelectDescription[] =
@@ -3270,8 +3264,7 @@ inline constexpr char kOriginKeyedProcessesByDefaultDescription[] =
 
 inline constexpr char kOverlayScrollbarsName[] = "Overlay Scrollbars";
 inline constexpr char kOverlayScrollbarsDescription[] =
-    "Enable the experimental overlay scrollbars implementation. You must also "
-    "enable threaded compositing to have the scrollbars animate.";
+    "Adjust scrollbar style to overlay web content and fade out.";
 
 inline constexpr char kOverlayScrollbarsFlashWhenMouseEnterName[] =
     "Flash Overlay Scrollbars When Mouse Enter";
@@ -3398,11 +3391,6 @@ inline constexpr char kPasswordManagerShowSuggestionsOnAutofocusDescription[] =
     "Enables showing password suggestions without requiring the user to "
     "click on the already focused field if the field was autofocused on "
     "the page load.";
-
-inline constexpr char kPasswordManualFallbackAvailableName[] =
-    "Password manual fallback";
-inline constexpr char kPasswordManualFallbackAvailableDescription[] =
-    "Enables triggering password suggestions through the context menu";
 
 inline constexpr char kPasswordUploadUiUpdateName[] =
     "Password Upload UI Update";
@@ -7441,9 +7429,6 @@ inline constexpr char kLockScreenNotificationName[] =
     "Lock screen notification";
 inline constexpr char kLockScreenNotificationDescription[] =
     "Enable notifications on the lock screen.";
-
-inline constexpr char kMahiName[] = "Mahi feature";
-inline constexpr char kMahiDescription[] = "Enable Mahi feature on ChromeOS.";
 
 inline constexpr char kMahiDebuggingName[] = "Mahi Debugging";
 inline constexpr char kMahiDebuggingDescription[] =

@@ -18,6 +18,7 @@
 #include "chrome/browser/ui/views/tabs/tab_strip_types.h"
 #include "chrome/browser/ui/views/tabs/vertical/tab_collection_node.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_controller.h"
+#include "components/tabs/public/split_tab_collection.h"
 #include "components/tabs/public/tab_collection.h"
 #include "components/tabs/public/tab_group_tab_collection.h"
 #include "components/tabs/public/tab_interface.h"
@@ -125,7 +126,7 @@ void VerticalTabDragHandlerImpl::EndDrag(EndDragReason reason) {
   ResetDragState();
 }
 
-void VerticalTabDragHandlerImpl::DraggedTabsOverNode(
+void VerticalTabDragHandlerImpl::HandleDraggedTabsOverNode(
     const TabCollectionNode& node) {
   if (!drag_controller_) {
     // Do nothing if the drag is not attached to our context yet (e.g. on the
@@ -140,6 +141,9 @@ void VerticalTabDragHandlerImpl::DraggedTabsOverNode(
   switch (node.type()) {
     case TabCollectionNode::Type::TAB:
       HandleTabDragOverTab(node);
+      break;
+    case TabCollectionNode::Type::SPLIT:
+      HandleTabDragOverSplit(node);
       break;
     case TabCollectionNode::Type::GROUP:
       HandleTabDragOverGroup(node);
@@ -158,6 +162,29 @@ void VerticalTabDragHandlerImpl::HandleTabDragOverTab(
   CHECK(tab);
   tab_strip_model_->MoveSelectedTabsTo(tab_strip_model_->GetIndexOfTab(tab),
                                        tab->GetGroup());
+}
+
+void VerticalTabDragHandlerImpl::HandleTabDragOverSplit(
+    const TabCollectionNode& node) {
+  const auto* split_collection = static_cast<const tabs::SplitTabCollection*>(
+      std::get<const tabs::TabCollection*>(node.GetNodeData()));
+  CHECK(split_collection);
+  split_tabs::SplitTabData* split_data = split_collection->data();
+  CHECK(split_data);
+  gfx::Range tab_range = split_data->GetIndexRange();
+  int first_tab_in_split = tab_range.GetMin();
+  int last_tab_in_split = tab_range.GetMax();
+
+  const auto& selection_model = tab_strip_model_->selection_model();
+  int first_selected_index =
+      *selection_model.GetListSelectionModel().selected_indices().cbegin();
+  int insertion_idx =
+      (first_selected_index < first_tab_in_split)
+          ? last_tab_in_split - selection_model.selected_tabs().size()
+          : first_tab_in_split;
+
+  tab_strip_model_->MoveSelectedTabsTo(
+      insertion_idx, split_data->ListTabs().front()->GetGroup());
 }
 
 void VerticalTabDragHandlerImpl::HandleTabDragOverGroup(

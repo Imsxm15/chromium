@@ -385,9 +385,14 @@ void ServiceWorkerSyntheticResponseManager::CloneBufferInBackground(
       std::move(callback).Then(base::BindOnce(
           [](std::unique_ptr<RaceNetworkRequestSimpleBufferManager>
                  simple_buffer_manager) {
-            // This lambda intentionally does nothing. Its sole purpose is to
-            // take ownership of the `unique_ptr` and trigger its destruction
-            // upon completion of the callback chain.
+            // This lambda is executed as the `clone_complete_callback_` from
+            // `RaceNetworkRequestSimpleBufferManager::Finish`. If we allow
+            // `simple_buffer_manager` to be destructed synchronously here,
+            // `Finish()` will still be on the call stack, leading to a
+            // use-after-free. `DeleteSoon()` defers the deletion, avoiding
+            // this issue.
+            base::SequencedTaskRunner::GetCurrentDefault()->DeleteSoon(
+                FROM_HERE, simple_buffer_manager.release());
           },
           std::move(simple_buffer_manager))));
 }

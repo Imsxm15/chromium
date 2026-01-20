@@ -242,7 +242,7 @@ BASE_FEATURE(kIOSChooseFromDrive, base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kIOSDownloadNoUIUpdateInBackground,
              base::FEATURE_DISABLED_BY_DEFAULT);
 
-BASE_FEATURE(kIOSSaveToDriveClientFolder, base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kIOSSaveToDriveClientFolder, base::FEATURE_ENABLED_BY_DEFAULT);
 
 BASE_FEATURE(kEnableFeedBackgroundRefresh, base::FEATURE_DISABLED_BY_DEFAULT);
 
@@ -607,6 +607,8 @@ const char kIOSExpandedSetupListVariationParamSafariImport[] =
     "kIOSExpandedSetupListVariationParamSafariImport";
 const char kIOSExpandedSetupListVariationParamBackgroundCustomization[] =
     "kIOSExpandedSetupListVariationParamBackgroundCustomization";
+extern const char kIOSExpandedSetupListVariationParamAllExceptCPE[] =
+    "kIOSExpandedSetupListVariationParamAllExceptCPE";
 const char kIOSExpandedSetupListVariationParamAll[] =
     "kIOSExpandedSetupListVariationParamAll";
 

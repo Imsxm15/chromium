@@ -8,6 +8,7 @@
 #include "chrome/browser/ui/views/tabs/vertical/tab_collection_animating_layout_manager.h"
 #include "chrome/browser/ui/views/tabs/vertical/tab_collection_node.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_dragged_tabs_container.h"
+#include "chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_drag_handler.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_group_view.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_controller.h"
@@ -134,16 +135,18 @@ void VerticalUnpinnedTabContainerView::HandleTabDragInContainer(
   const views::ProposedLayout& target_layout = layout_manager_->target_layout();
   views::View* view_at_point =
       GetViewAtPoint(target_layout, point_in_container);
+  const TabCollectionNode* node = collection_node_;
   if (auto* tab_view = views::AsViewClass<VerticalTabView>(view_at_point)) {
-    tab_view->OnTabDragOver();
+    node = tab_view->collection_node();
   } else if (auto* group_view =
                  views::AsViewClass<VerticalTabGroupView>(view_at_point)) {
-    group_view->OnTabDragOver();
-  } else {
-    // If the drag isn't over any child views, then treat it as a drag over
-    // the unpinned tab container.
-    GetDragHandler().DraggedTabsOverNode(*collection_node_);
+    node = group_view->collection_node();
+  } else if (auto* split_tab_view =
+                 views::AsViewClass<VerticalSplitTabView>(view_at_point)) {
+    node = split_tab_view->collection_node();
   }
+  CHECK(node);
+  GetDragHandler().HandleDraggedTabsOverNode(*node);
 }
 
 BEGIN_METADATA(VerticalUnpinnedTabContainerView)

@@ -5755,15 +5755,6 @@ const FeatureEntry kFeatureEntries[] = {
     },
 #endif  // BUILDFLAG(IS_WIN)
 
-#if BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX)
-    {
-        "fluent-overlay-scrollbars",
-        flag_descriptions::kFluentOverlayScrollbarsName,
-        flag_descriptions::kFluentOverlayScrollbarsDescription,
-        kOsWin | kOsLinux,
-        FEATURE_VALUE_TYPE(features::kFluentOverlayScrollbar),
-    },
-#endif  // BUILDFLAG(IS_WIN) || BUILDFLAG(IS_LINUX)
 #if BUILDFLAG(IS_CHROMEOS)
     {
         "zero-copy-video-capture",
@@ -10679,9 +10670,6 @@ const FeatureEntry kFeatureEntries[] = {
      flag_descriptions::kBatteryChargeLimitDescription, kOsCrOS,
      FEATURE_VALUE_TYPE(ash::features::kBatteryChargeLimit)},
 
-    {"mahi", flag_descriptions::kMahiName, flag_descriptions::kMahiDescription,
-     kOsCrOS, FEATURE_VALUE_TYPE(chromeos::features::kMahi)},
-
     {"mahi-debugging", flag_descriptions::kMahiDebuggingName,
      flag_descriptions::kMahiDebuggingDescription, kOsCrOS,
      FEATURE_VALUE_TYPE(chromeos::features::kMahiDebugging)},
@@ -10723,12 +10711,6 @@ const FeatureEntry kFeatureEntries[] = {
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
 #if !BUILDFLAG(IS_ANDROID)
-    {"password-manual-fallback-available",
-     flag_descriptions::kPasswordManualFallbackAvailableName,
-     flag_descriptions::kPasswordManualFallbackAvailableDescription, kOsDesktop,
-     FEATURE_VALUE_TYPE(
-         password_manager::features::kPasswordManualFallbackAvailable)},
-
     {"save-passwords-contextual-ui",
      flag_descriptions::kSavePasswordsContextualUiName,
      flag_descriptions::kSavePasswordsContextualUiDescription, kOsDesktop,

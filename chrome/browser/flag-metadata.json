@@ -490,12 +490,12 @@
   {
     "name": "apply-clientside-model-predictions-for-otps",
     "owners": [ "kazinova@google.com", "vasilii@chromium.org", "chrome-password-manager-team@google.com"],
-    "expiry_milestone": 146
+    "expiry_milestone": 149
   },
   {
     "name": "apply-clientside-model-predictions-for-password-types",
     "owners": [ "kazinova@google.com", "vasilii@chromium.org", "chrome-password-manager-team@google.com"],
-    "expiry_milestone": 146
+    "expiry_milestone": 149
   },
   {
     "name": "approximate-geolocation-permission",
@@ -6306,11 +6306,6 @@
     "expiry_milestone": 144
   },
   {
-    "name": "mahi",
-    "owners": [ "thanhdng@chromium.org", "chrome-knowledge-eng@google.com" ],
-    "expiry_milestone": 135
-  },
-  {
     "name": "mahi-debugging",
     "owners": [ "thanhdng@chromium.org", "chrome-knowledge-eng@google.com" ],
     "expiry_milestone": 135
@@ -7346,13 +7341,7 @@
     "owners": [ "jinsukkim@chromium.org" ],
     "expiry_milestone": 118
   },
-  {
-    // Suggests the Ozone platform to use (desktop Linux only).  Can be set on
-    // chrome://flags.  See https://crbug.com/1246928.
-    "name": "ozone-platform-hint",
-    "owners": [ "rjkroege@chromium.org", "thomasanderson@chromium.org", "msisov@igalia.com", "nickdiego@igalia.com", "adunaev@igalia.com" ],
-    "expiry_milestone": 145
-  },
+
   {
     "name": "page-action-menu",
     "owners": [ "adamta@google.com", "bling-alchemy-eng@google.com" ],
@@ -7442,11 +7431,6 @@
     "expiry_milestone": 135
   },
   {
-    "name": "password-manual-fallback-available",
-    "owners": ["tchudakov@google.com", "vasilii@google.com", "chrome-password-manager-team@google.com"],
-    "expiry_milestone": 138
-  },
-  {
       "name": "password-removal-from-delete-browsing-data",
       "owners": ["noemies@google.com", "novakovica@google.com", "bling-transactions@google.com"],
       "expiry_milestone": 150
@@ -7523,7 +7507,7 @@
       "hempjudith@google.com",
       "//components/permissions/PERMISSIONS_OWNERS"
     ],
-    "expiry_milestone": 144
+    "expiry_milestone": 150
   },
   {
     "name": "permission-site-settings-radio-button",
@@ -7550,7 +7534,7 @@
       "hempjudith@google.com",
       "//components/permissions/PERMISSIONS_OWNERS"
     ],
-    "expiry_milestone": 144
+    "expiry_milestone": 150
   },
   {
     "name": "permissions-ai-v4",

@@ -442,8 +442,8 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
             @NonNull Supplier<CompositorViewHolder> compositorViewHolderSupplier,
             @NonNull Supplier<TabContentManager> tabContentManagerSupplier,
             @NonNull Supplier<SnackbarManager> snackbarManagerSupplier,
-            @NonNull ObservableSupplierImpl<EdgeToEdgeController> edgeToEdgeSupplier,
-            @NonNull ObservableSupplierImpl<TopInsetProvider> topInsetProviderSupplier,
+            @NonNull SettableMonotonicObservableSupplier<EdgeToEdgeController> edgeToEdgeSupplier,
+            @NonNull SettableMonotonicObservableSupplier<TopInsetProvider> topInsetProviderSupplier,
             @NonNull OneshotSupplierImpl<SystemBarColorHelper> systemBarColorHelperSupplier,
             @ActivityType int activityType,
             @NonNull Supplier<Boolean> isInOverviewModeSupplier,
@@ -1602,7 +1602,11 @@ public class TabbedRootUiCoordinator extends RootUiCoordinator {
     private void initiateTabBottomSheetManagers() {
         if (TabBottomSheetUtils.isTabBottomSheetEnabled()) {
             mTabBottomSheetManager =
-                    new TabBottomSheetManager(mActivity, getBottomSheetController());
+                    new TabBottomSheetManager(
+                            mActivity,
+                            mProfileSupplier.get(),
+                            mWindowAndroid,
+                            getBottomSheetController());
             mTabBottomSheetSimpleManager =
                     new TabBottomSheetSimpleManager(
                             mActivity,

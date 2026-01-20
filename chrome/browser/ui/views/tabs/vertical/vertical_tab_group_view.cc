@@ -15,6 +15,7 @@
 #include "chrome/browser/ui/views/tabs/vertical/tab_collection_animating_layout_manager.h"
 #include "chrome/browser/ui/views/tabs/vertical/tab_collection_node.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_dragged_tabs_container.h"
+#include "chrome/browser/ui/views/tabs/vertical/vertical_split_tab_view.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_group_header_view.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_controller.h"
 #include "chrome/browser/ui/views/tabs/vertical/vertical_tab_view.h"
@@ -259,17 +260,15 @@ void VerticalTabGroupView::HandleTabDragInContainer(
     const gfx::Point point_in_container) {
   views::View* view_at_point =
       GetViewAtPoint(layout_manager_->target_layout(), point_in_container);
+  const TabCollectionNode* node = collection_node_;
   if (auto* tab_view = views::AsViewClass<VerticalTabView>(view_at_point)) {
-    tab_view->OnTabDragOver();
-  } else {
-    // If the drag isn't over any tab views including the header, then treat it
-    // as a drag over the group view container.
-    GetDragHandler().DraggedTabsOverNode(*collection_node_);
+    node = tab_view->collection_node();
+  } else if (auto* split_tab_view =
+                 views::AsViewClass<VerticalSplitTabView>(view_at_point)) {
+    node = split_tab_view->collection_node();
   }
-}
-
-void VerticalTabGroupView::OnTabDragOver() {
-  GetDragHandler().DraggedTabsOverNode(*collection_node_);
+  CHECK(node);
+  GetDragHandler().HandleDraggedTabsOverNode(*node);
 }
 
 BEGIN_METADATA(VerticalTabGroupView)
