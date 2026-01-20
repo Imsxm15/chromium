@@ -17,6 +17,10 @@ const compareNotes = document.querySelector<HTMLDivElement>('#compareNotes');
 const compareMarkdown =
     document.querySelector<HTMLTextAreaElement>('#compareMarkdown');
 const compareCsv = document.querySelector<HTMLTextAreaElement>('#compareCsv');
+const agentStatus = document.querySelector<HTMLDivElement>('#agentStatus');
+const agentActionList =
+    document.querySelector<HTMLDivElement>('#agentActionList');
+const agentLog = document.querySelector<HTMLDivElement>('#agentLog');
 
 function renderSummary(lines: string[]) {
   if (!summaryOutput) {
@@ -93,6 +97,76 @@ function renderCompareTabs(tabs: Array<{index: number, title: string, url: strin
   }
 }
 
+function renderAgentStatus(message: string) {
+  if (!agentStatus) {
+    return;
+  }
+  agentStatus.textContent = message;
+}
+
+function appendAgentLog(message: string) {
+  if (!agentLog) {
+    return;
+  }
+  const entry = document.createElement('div');
+  entry.textContent = message;
+  agentLog.appendChild(entry);
+}
+
+function renderAgentActions(actions: Array<{id: string, type: string, label: string, selector?: string, value?: string}>) {
+  if (!agentActionList) {
+    return;
+  }
+  agentActionList.textContent = '';
+  for (const action of actions) {
+    const row = document.createElement('div');
+    row.style.marginBottom = '8px';
+
+    const label = document.createElement('div');
+    label.textContent = action.label;
+    row.appendChild(label);
+
+    const selectorInput = document.createElement('input');
+    selectorInput.type = 'text';
+    selectorInput.placeholder = 'selector';
+    selectorInput.value = action.selector || '';
+    if (action.type === 'focus') {
+      selectorInput.disabled = true;
+    }
+    row.appendChild(selectorInput);
+
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.placeholder = 'value';
+    valueInput.value = action.value || '';
+    if (action.type !== 'fill') {
+      valueInput.disabled = true;
+    }
+    row.appendChild(valueInput);
+
+    const button = document.createElement('button');
+    button.textContent = 'Confirm';
+    button.addEventListener('click', async () => {
+      const payload = {
+        id: action.id,
+        type: action.type,
+        selector: selectorInput.value,
+        value: valueInput.value,
+      };
+      const response = await sendWithPromise('executeAiAgentAction', payload);
+      if (response.error) {
+        renderAgentStatus(response.error);
+        return;
+      }
+      renderAgentStatus('');
+      appendAgentLog(`${action.label}: ${response.success ? 'done' : 'failed'}`);
+    });
+    row.appendChild(button);
+
+    agentActionList.appendChild(row);
+  }
+}
+
 summarizeButton?.addEventListener('click', async () => {
   const response = await sendWithPromise('getAiLocalSummary');
   if (response.error) {
@@ -142,3 +216,10 @@ compareButton?.addEventListener('click', async () => {
 });
 
 loadCompareTabs();
+
+async function loadAgentActions() {
+  const response = await sendWithPromise('getAiAgentActions');
+  renderAgentActions(response || []);
+}
+
+loadAgentActions();

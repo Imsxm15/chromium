@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "base/feature_list.h"
+#include "base/strings/escape.h"
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
@@ -24,6 +25,7 @@
 #include "components/prefs/pref_service.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_ui.h"
+#include "content/public/common/url_constants.h"
 #include "content/public/browser/web_ui_data_source.h"
 #include "ui/webui/webui_util.h"
 
@@ -138,6 +140,62 @@ base::Value::Dict BuildLocalSummary(Browser* browser) {
   return result;
 }
 
+base::Value::List BuildAgentActions() {
+  base::Value::List actions;
+  {
+    base::Value::Dict action;
+    action.Set("id", "focus");
+    action.Set("type", "focus");
+    action.Set("label", "Focus the page");
+    actions.Append(std::move(action));
+  }
+  {
+    base::Value::Dict action;
+    action.Set("id", "click");
+    action.Set("type", "click");
+    action.Set("label", "Click element by selector");
+    action.Set("selector", "button");
+    actions.Append(std::move(action));
+  }
+  {
+    base::Value::Dict action;
+    action.Set("id", "fill");
+    action.Set("type", "fill");
+    action.Set("label", "Fill input by selector");
+    action.Set("selector", "input");
+    action.Set("value", "example");
+    actions.Append(std::move(action));
+  }
+  return actions;
+}
+
+std::u16string BuildActionScript(const std::string& type,
+                                 const std::string& selector,
+                                 const std::string& value) {
+  if (type == "focus") {
+    return u"(() => { window.focus(); return true; })();";
+  }
+
+  const std::u16string escaped_selector =
+      base::EscapeJavaScriptString(selector);
+  const std::u16string escaped_value = base::EscapeJavaScriptString(value);
+  if (type == "click") {
+    return u"(() => { const el = document.querySelector(" +
+           escaped_selector +
+           u"); if (!el) return false; el.click(); return true; })();";
+  }
+  if (type == "fill") {
+    return u"(() => { const el = document.querySelector(" +
+           escaped_selector +
+           u"); if (!el) return false; el.focus(); el.value = " +
+           escaped_value +
+           u"; el.dispatchEvent(new Event('input', {bubbles:true}));"
+           u" el.dispatchEvent(new Event('change', {bubbles:true}));"
+           u" return true; })();";
+  }
+  return u"(() => false)();";
+}
+
 }  // namespace
 
 AiSidePanelMessageHandler::AiSidePanelMessageHandler() = default;
@@ -156,6 +214,14 @@ void AiSidePanelMessageHandler::RegisterMessages() {
   web_ui()->RegisterMessageCallback(
       "compareAiTabs",
       base::BindRepeating(&AiSidePanelMessageHandler::HandleCompareTabs,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "getAiAgentActions",
+      base::BindRepeating(&AiSidePanelMessageHandler::HandleGetAgentActions,
+                          base::Unretained(this)));
+  web_ui()->RegisterMessageCallback(
+      "executeAiAgentAction",
+      base::BindRepeating(&AiSidePanelMessageHandler::HandleExecuteAgentAction,
                           base::Unretained(this)));
 }
 
@@ -240,6 +306,81 @@ void AiSidePanelMessageHandler::HandleCompareTabs(
 
   ResolveJavascriptCallback(callback_id,
                             BuildCompareResult(browser, tab_indices));
+}
+
+void AiSidePanelMessageHandler::HandleGetAgentActions(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 1u);
+  const base::Value& callback_id = args[0];
+  ResolveJavascriptCallback(callback_id, BuildAgentActions());
+}
+
+void AiSidePanelMessageHandler::HandleExecuteAgentAction(
+    const base::Value::List& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 2u);
+  const base::Value& callback_id = args[0];
+  const base::Value::Dict& action = args[1].GetDict();
+  const std::string* type = action.FindString("type");
+  const std::string* selector = action.FindString("selector");
+  const std::string* value = action.FindString("value");
+  if (!type) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  content::WebContents* contents = web_ui()->GetWebContents();
+  Browser* browser = chrome::FindBrowserWithTab(contents);
+  if (!browser) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  PrefService* prefs = browser->profile()->GetPrefs();
+  const bool agent_enabled =
+      base::FeatureList::IsEnabled(features::kAiAgentActions) &&
+      prefs->GetBoolean(prefs::kAiEnabled) &&
+      prefs->GetBoolean(prefs::kAiSidePanelEnabled);
+  if (!agent_enabled) {
+    base::Value::Dict error;
+    error.Set("error", "Agent actions are disabled.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  content::WebContents* target = browser->tab_strip_model()->GetActiveWebContents();
+  if (!target) {
+    ResolveJavascriptCallback(callback_id, base::Value::Dict());
+    return;
+  }
+
+  if (!target->GetVisibleURL().SchemeIs(content::kChromeUIScheme)) {
+    base::Value::Dict error;
+    error.Set("error", "Agent actions are limited to chrome:// pages in this MVP.");
+    ResolveJavascriptCallback(callback_id, std::move(error));
+    return;
+  }
+
+  const std::string selector_value = selector ? *selector : std::string();
+  const std::string input_value = value ? *value : std::string();
+  std::u16string script = BuildActionScript(*type, selector_value, input_value);
+  target->GetPrimaryMainFrame()->ExecuteJavaScript(
+      script,
+      base::BindOnce(&AiSidePanelMessageHandler::OnActionScriptExecuted,
+                     weak_factory_.GetWeakPtr(), base::Value(callback_id)));
+}
+
+void AiSidePanelMessageHandler::OnActionScriptExecuted(
+    base::Value callback_id,
+    base::Value result) {
+  base::Value::Dict response;
+  if (result.is_bool()) {
+    response.Set("success", result.GetBool());
+  } else {
+    response.Set("success", false);
+  }
+  ResolveJavascriptCallback(callback_id, std::move(response));
 }
 
 AiSidePanelUI::AiSidePanelUI(content::WebUI* web_ui)

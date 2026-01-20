@@ -5,6 +5,7 @@
 #ifndef CHROME_BROWSER_UI_WEBUI_SIDE_PANEL_AI_AI_SIDE_PANEL_UI_H_
 #define CHROME_BROWSER_UI_WEBUI_SIDE_PANEL_AI_AI_SIDE_PANEL_UI_H_
 
+#include "base/memory/weak_ptr.h"
 #include "chrome/browser/ui/webui/top_chrome/top_chrome_web_ui_controller.h"
 #include "chrome/browser/ui/webui/top_chrome/top_chrome_webui_config.h"
 #include "chrome/common/webui_url_constants.h"
@@ -26,6 +27,11 @@ class AiSidePanelMessageHandler : public content::WebUIMessageHandler {
   void HandleGetLocalSummary(const base::Value::List& args);
   void HandleGetTabList(const base::Value::List& args);
   void HandleCompareTabs(const base::Value::List& args);
+  void HandleGetAgentActions(const base::Value::List& args);
+  void HandleExecuteAgentAction(const base::Value::List& args);
+  void OnActionScriptExecuted(base::Value callback_id, base::Value result);
+
+  base::WeakPtrFactory<AiSidePanelMessageHandler> weak_factory_{this};
 };
 
 class AiSidePanelUIConfig : public DefaultTopChromeWebUIConfig<AiSidePanelUI> {
