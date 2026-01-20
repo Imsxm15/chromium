@@ -10,6 +10,14 @@
 
 namespace features {
 
+BASE_DECLARE_FEATURE(kAiSidePanel);
+BASE_DECLARE_FEATURE(kAiLocalSummaries);
+BASE_DECLARE_FEATURE(kAiComparePages);
+BASE_DECLARE_FEATURE(kAiAnchoredNotes);
+BASE_DECLARE_FEATURE(kAiProjects);
+BASE_DECLARE_FEATURE(kAiAgentActions);
+BASE_DECLARE_FEATURE(kAiSecurityInsights);
+
 BASE_DECLARE_FEATURE(kAILanguageModelOverrideConfiguration);
 extern const base::FeatureParam<int>
     kAILanguageModelOverrideConfigurationOutputBuffer;
