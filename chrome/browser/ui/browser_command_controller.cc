@@ -21,6 +21,7 @@
 #include "build/branding_buildflags.h"
 #include "build/build_config.h"
 #include "chrome/app/chrome_command_ids.h"
+#include "chrome/browser/ai/features.h"
 #include "chrome/browser/actor/ui/actor_overlay_web_view.h"
 #include "chrome/browser/browser_process.h"
 #include "chrome/browser/commerce/browser_utils.h"
@@ -1264,6 +1265,14 @@ bool BrowserCommandController::ExecuteCommandWithDisposition(
       break;
     }
 
+    case IDC_SHOW_AI_SIDE_PANEL: {
+      if (browser_->GetFeatures().side_panel_ui()) {
+        browser_->GetFeatures().side_panel_ui()->Show(
+            SidePanelEntryId::kAiSidePanel, SidePanelOpenTrigger::kAppMenu);
+      }
+      break;
+    }
+
     case IDC_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL: {
       ShowCustomizeChromeSidePanel(SidePanelOpenTrigger::kAppMenu,
                                    CustomizeChromeSection::kAppearance);
@@ -1532,6 +1541,11 @@ void BrowserCommandController::InitCommandState() {
       << "Ought to never have browser for the system profile.";
   const bool normal_window = browser_->is_type_normal();
   const bool guest_session = profile()->IsGuestSession();
+  PrefService* pref_service = profile()->GetPrefs();
+  const bool ai_side_panel_enabled =
+      base::FeatureList::IsEnabled(features::kAiSidePanel) &&
+      pref_service->GetBoolean(prefs::kAiEnabled) &&
+      pref_service->GetBoolean(prefs::kAiSidePanelEnabled);
 
   command_updater_.UpdateCommandEnabled(IDC_OPEN_FILE, CanOpenFile(browser_));
 
@@ -1577,6 +1591,8 @@ void BrowserCommandController::InitCommandState() {
   command_updater_.UpdateCommandEnabled(IDC_FIND_AND_EDIT_MENU, true);
   command_updater_.UpdateCommandEnabled(IDC_SAVE_AND_SHARE_MENU, true);
   command_updater_.UpdateCommandEnabled(IDC_SHOW_READING_MODE_SIDE_PANEL, true);
+  command_updater_.UpdateCommandEnabled(IDC_SHOW_AI_SIDE_PANEL,
+                                        ai_side_panel_enabled);
   command_updater_.UpdateCommandEnabled(IDC_SHOW_CUSTOMIZE_CHROME_SIDE_PANEL,
                                         true);
   command_updater_.UpdateCommandEnabled(IDC_SHOW_CUSTOMIZE_CHROME_TOOLBAR,
